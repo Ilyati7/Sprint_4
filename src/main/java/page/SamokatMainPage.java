@@ -16,6 +16,9 @@ public class SamokatMainPage {
     // Селекторы для кнопок заказа
     private final By HEADER_ORDER_BUTTON = By.cssSelector("button[class='Button_Button__ra12g']");
     private final By MIDDLE_ORDER_BUTTON = By.cssSelector("button[class='Button_Button__ra12g Button_Middle__1CSJM']");
+    // Приватные локаторы для FAQ
+    private final By faqAccordionHeader = By.cssSelector("[id^='accordion__heading-']");
+    private final By faqPanel = By.cssSelector("[id^='accordion__panel-']");
     // Константы для ожиданий
     private static final int DEFAULT_WAIT_SECONDS = 10;
 
@@ -43,6 +46,8 @@ public class SamokatMainPage {
     private WebDriverWait createWait() {
         return new WebDriverWait(driver, Duration.ofSeconds(DEFAULT_WAIT_SECONDS));
     }
+
+
 
     // Метод для клика по кнопке заказа в шапке сайта
     public void clickHeaderOrderButton() {
@@ -135,9 +140,6 @@ public class SamokatMainPage {
         assertTrue("FAQ ответ должен содержать ожидаемый текст", actualAnswer.contains(expectedAnswer));
     }
 
-
-
-
     // Метод для assertTrue
     public void assertTrue(String message, boolean condition) {
         if (!condition) {
@@ -145,14 +147,29 @@ public class SamokatMainPage {
         }
     }
     public void scrollToMiddleOrderButton() {
-        // Получаем элемент кнопки
-        WebElement element = driver.findElement(By.cssSelector("button[class='Button_Button__ra12g Button_Middle__1CSJM']"));
+        WebDriverWait wait = createWait();
+        WebElement element = wait.until(ExpectedConditions.visibilityOfElementLocated(MIDDLE_ORDER_BUTTON));
 
         // Выполняем JavaScript для прокрутки
         ((JavascriptExecutor) driver).executeScript(
                 "arguments[0].scrollIntoView({ behavior: 'smooth', block: 'center' });",
                 element
         );
+    }
+    public void checkFaqItem(String faqId, String expectedQuestion, String panelId, String expectedAnswer) {
+        clickFaqAccordionItem(faqId);
+        verifyFaqQuestion(faqId, expectedQuestion);
+        verifyFaqAnswer(panelId, expectedAnswer);
+    }
+
+    private WebElement getFaqElementById(String faqId) {
+        By faqLocator = By.xpath("//div[@id='" + faqId + "']");
+        return driver.findElement(faqLocator);
+    }
+
+    private WebElement getFaqPanelById(String panelId) {
+        By panelLocator = By.xpath("//div[@id='" + panelId + "']//p");
+        return driver.findElement(panelLocator);
     }
 }
 

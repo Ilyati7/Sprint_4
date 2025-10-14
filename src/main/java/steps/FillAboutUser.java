@@ -15,13 +15,13 @@ public class FillAboutUser {
     private final WebDriver driver;
 
     // Селекторы для полей формы - личные данные
-    private final By NAME_FIELD = By.cssSelector("input[placeholder='* Имя']");
-    private final By SURNAME_FIELD = By.cssSelector("input[placeholder='* Фамилия']");
-    private final By ADDRESS_FIELD = By.cssSelector("input[placeholder='* Адрес: куда привезти заказ']");
-    private final By METRO_FIELD = By.cssSelector("input[placeholder='* Станция метро']");
-    private final By PHONE_FIELD = By.cssSelector("input[placeholder='* Телефон: на него позвонит курьер']");
+    private static final By NAME_FIELD = By.cssSelector("input[placeholder='* Имя']");
+    private static final By SURNAME_FIELD = By.cssSelector("input[placeholder='* Фамилия']");
+    private static final By ADDRESS_FIELD = By.cssSelector("input[placeholder='* Адрес: куда привезти заказ']");
+    private static final By METRO_FIELD = By.cssSelector("input[placeholder='* Станция метро']");
+    private static final By PHONE_FIELD = By.cssSelector("input[placeholder='* Телефон: на него позвонит курьер']");
     //Селектор кнопки далее
-    private final By NEXT_BUTTON = By.cssSelector("button[class='Button_Button__ra12g Button_Middle__1CSJM']");
+    private static final By NEXT_BUTTON = By.cssSelector("button[class='Button_Button__ra12g Button_Middle__1CSJM']");
 
 
     //Конструктор класса

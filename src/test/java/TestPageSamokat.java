@@ -7,6 +7,8 @@ import steps.OrderPageSteps;
 import java.util.Arrays;
 import java.util.Collection;
 
+import static org.junit.Assert.assertTrue;
+
 @RunWith(Parameterized.class)
 public class TestPageSamokat extends BaseTests {
 
@@ -65,5 +67,7 @@ public class TestPageSamokat extends BaseTests {
         orderSteps.fillOrderDetails("24.10.2025", "сутки", color, comment);
         orderSteps.confirmOrder();
         orderSteps.verifyOrderSuccess();
+        // явный ассерт
+        assertTrue(orderSteps.verifyOrderSuccess());
     }
 }

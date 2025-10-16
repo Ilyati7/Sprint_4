@@ -5,6 +5,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
+import java.util.List;
 
 public class SamokatMainPage {
     private final WebDriver driver;
@@ -14,11 +15,11 @@ public class SamokatMainPage {
     // Селекторы для cookies
     private static final By COOKIE_CONSENT_BUTTON = By.id("rcc-confirm-button");
     // Селекторы для кнопок заказа
-    private final By HEADER_ORDER_BUTTON = By.cssSelector("button[class='Button_Button__ra12g']");
-    private final By MIDDLE_ORDER_BUTTON = By.cssSelector("button[class='Button_Button__ra12g Button_Middle__1CSJM']");
-    // Приватные локаторы для FAQ
-    private final By faqAccordionHeader = By.cssSelector("[id^='accordion__heading-']");
-    private final By faqPanel = By.cssSelector("[id^='accordion__panel-']");
+    private static final By HEADER_ORDER_BUTTON = By.cssSelector("button[class='Button_Button__ra12g']");
+    private static final By MIDDLE_ORDER_BUTTON = By.cssSelector("button[class='Button_Button__ra12g Button_Middle__1CSJM']");
+    // Обновленные селекторы для FAQ
+    private static final By faqHeaders = By.cssSelector(".accordion__heading");
+    private static final By faqPanels = By.cssSelector(".accordion__panel");
     // Константы для ожиданий
     private static final int DEFAULT_WAIT_SECONDS = 10;
 
@@ -85,67 +86,60 @@ public class SamokatMainPage {
                     "arguments[0].scrollIntoView({ behavior: 'smooth', block: 'center' });",
                     element
             );
-
-            // Второй вариант с дополнительным смещением
-            ((JavascriptExecutor) driver).executeScript(
-                    "window.scrollBy(0, -100);",
-                    element
-            );
-
-            // Добавить явное ожидание после скролла
-            Thread.sleep(500); // Добавить паузу для стабилизации
+            // Явное ожидание видимости элемента
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+            wait.until(ExpectedConditions.visibilityOf(element));
+        } catch (TimeoutException e) {
+            System.out.println("Ошибка при ожидании видимости элемента: " + e.getMessage());
         } catch (Exception e) {
-            System.out.println("Ошибка при скролле: " + e.getMessage());
+            System.out.println("Ошибка при скролле элемента: " + e.getMessage());
         }
     }
 
-
-    // Нажатие на элемент аккордеона FAQ с предварительным скроллингом
-    public void clickFaqAccordionItem(String faqId) {
-        By faqLocator = By.xpath("//div[@id='" + faqId + "']");
+    // Проверка FAQ с использованием индексов
+    public void checkFaqItem(int questionIndex, String expectedQuestion, String expectedAnswer) {
         WebDriverWait wait = createWait();
+        WebElement question = driver.findElements(By.cssSelector(".accordion__heading")).get(questionIndex);
+
         try {
-            WebElement faqElement = wait.until(ExpectedConditions.presenceOfElementLocated(faqLocator));
-            scrollToElement(faqElement);
 
-            wait.until(ExpectedConditions.elementToBeClickable(faqElement));
-            faqElement.click();
-        } catch (Exception e) {
-            System.out.println("Ошибка при клике на FAQ: " + e.getMessage());
-            throw new RuntimeException("Не удалось кликнуть на элемент FAQ", e);
-
+            wait.until(ExpectedConditions.elementToBeClickable(question));
+            question.click();
+        } catch (ElementClickInterceptedException e) {
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", question);
         }
+        // Получаем все заголовки и панели FAQ
+        List<WebElement> headers = wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(faqHeaders));
+        List<WebElement> panels = wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(faqPanels));
+
+        // Проверяем корректность индекса
+        if (questionIndex >= headers.size() || questionIndex >= panels.size()) {
+            throw new RuntimeException("Неверный индекс FAQ: " + questionIndex);
+        }
+
+        // Кликаем по нужному заголовку
+        WebElement header = headers.get(questionIndex);
+        scrollToElement(header);
+        header.click();
+
+        // Проверяем вопрос
+        String actualQuestion = header.getText();
+        assertTrue("Неверный текст вопроса", actualQuestion.contains(expectedQuestion));
+
+        // Проверяем ответ
+        WebElement panel = panels.get(questionIndex);
+        String actualAnswer = panel.getText();
+        assertTrue("Неверный текст ответа", actualAnswer.contains(expectedAnswer));
     }
 
-    // Проверка текста вопроса FAQ
-    public void verifyFaqQuestion(String faqId, String expectedQuestion) {
-        By faqLocator = By.xpath("//div[@id='" + faqId + "']");
-        WebElement faqElement = driver.findElement(faqLocator);
-        String actualQuestion = faqElement.getText();
-        assertTrue("FAQ вопрос должен содержать ожидаемый текст", actualQuestion.contains(expectedQuestion));
-    }
-    // Проверка текста ответа в панели аккордеона FAQ
-    public void verifyFaqAnswer(String panelId, String expectedAnswer) {
-        WebDriverWait wait = createWait();
-
-        // Ожидание появления панели
-        By panelLocator = By.xpath("//div[@id='" + panelId + "']//p");
-        WebElement answerElement = wait.until(ExpectedConditions.visibilityOfElementLocated(panelLocator));
-
-        // Скролл и ожидание видимости текста
-        scrollToElement(answerElement);
-        wait.until(ExpectedConditions.textToBePresentInElement(answerElement, expectedAnswer));
-
-        String actualAnswer = answerElement.getText();
-        assertTrue("FAQ ответ должен содержать ожидаемый текст", actualAnswer.contains(expectedAnswer));
-    }
-
-    // Метод для assertTrue
+    // Метод для assertTrue с улучшенной логировкой
     public void assertTrue(String message, boolean condition) {
         if (!condition) {
+            System.out.println("Ошибка проверки: " + message);
             throw new AssertionError(message);
         }
     }
+
     public void scrollToMiddleOrderButton() {
         WebDriverWait wait = createWait();
         WebElement element = wait.until(ExpectedConditions.visibilityOfElementLocated(MIDDLE_ORDER_BUTTON));
@@ -156,20 +150,4 @@ public class SamokatMainPage {
                 element
         );
     }
-    public void checkFaqItem(String faqId, String expectedQuestion, String panelId, String expectedAnswer) {
-        clickFaqAccordionItem(faqId);
-        verifyFaqQuestion(faqId, expectedQuestion);
-        verifyFaqAnswer(panelId, expectedAnswer);
-    }
-
-    private WebElement getFaqElementById(String faqId) {
-        By faqLocator = By.xpath("//div[@id='" + faqId + "']");
-        return driver.findElement(faqLocator);
-    }
-
-    private WebElement getFaqPanelById(String panelId) {
-        By panelLocator = By.xpath("//div[@id='" + panelId + "']//p");
-        return driver.findElement(panelLocator);
-    }
 }
-

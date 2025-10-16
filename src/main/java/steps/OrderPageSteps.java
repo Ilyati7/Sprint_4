@@ -14,22 +14,22 @@ public class OrderPageSteps {
     private final WebDriver driver;
 
     // Селекторы для полей формы - данные заказа
-    private final By DATE_FIELD = By.cssSelector("input[placeholder='* Когда привезти самокат']");
-    private final By RENTAL_PERIOD_DROPDOWN = By.cssSelector("div[class='Dropdown-placeholder']");
-    private final By COLOR_GREY = By.cssSelector("input[id='grey']");
-    private final By COLOR_BLACK = By.cssSelector("input[id='black']");
-    private final By COMMENT_FIELD = By.cssSelector("input[placeholder='Комментарий для курьера']");
+    private static final By DATE_FIELD = By.cssSelector("input[placeholder='* Когда привезти самокат']");
+    private static final By RENTAL_PERIOD_DROPDOWN = By.cssSelector("div[class='Dropdown-placeholder']");
+    private static final By COLOR_GREY = By.cssSelector("input[id='grey']");
+    private static final By COLOR_BLACK = By.cssSelector("input[id='black']");
+    private static final By COMMENT_FIELD = By.cssSelector("input[placeholder='Комментарий для курьера']");
 
     // Селектор для выбора опции
-    private final By DATE_OCTOBER_24 = By.cssSelector("div[aria-label='Choose пятница, 24-е октября 2025 г.']");
+    private static final By DATE_OCTOBER_24 = By.cssSelector("div[aria-label='Choose пятница, 24-е октября 2025 г.']");
 
 
     //Кнопка Заказать
-    private final By NEXT_BUTTON = By.cssSelector("button[class='Button_Button__ra12g Button_Middle__1CSJM']");
+    private static final By NEXT_BUTTON = By.cssSelector("button[class='Button_Button__ra12g Button_Middle__1CSJM']");
     //Селектор кнопки "Да"
-    private final By CONFIRM_BUTTON = By.xpath("//button[contains(text(), 'Да')]");
+    private static final By CONFIRM_BUTTON = By.xpath("//button[contains(text(), 'Да')]");
     // Селекторы для проверки результата
-    private final By ORDER_CONFIRMATION_MODAL = By.xpath("//div[contains(@class, 'Order_ModalHeader__3FDaJ') and contains(text(), 'Заказ оформлен')]");
+    private static final By ORDER_CONFIRMATION_MODAL = By.xpath("//div[contains(@class, 'Order_ModalHeader__3FDaJ') and contains(text(), 'Заказ оформлен')]");
 
 
 
@@ -119,7 +119,7 @@ public class OrderPageSteps {
 
     //Проверка подтверждения заказа
 
-    public void verifyOrderSuccess() {
+    public boolean verifyOrderSuccess() {
         WebDriverWait wait = createWait();
 
         try {
@@ -137,5 +137,6 @@ public class OrderPageSteps {
         } catch (Exception e) {
             throw new AssertionError("Ошибка при проверке модального окна", e);
         }
+        return true;
     }
 }
